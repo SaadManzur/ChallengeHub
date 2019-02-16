@@ -7,16 +7,18 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.challengehub.R;
@@ -29,23 +31,34 @@ import com.red5pro.streaming.event.R5ConnectionListener;
 import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 
+import java.util.List;
+
 /**
  * A simple {@link Fragment} subclass.
  */
 public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
     private final String TAG = this.getClass().toString();
-    private final int CAMERA_REQUEST_ID = 300;
+    private final int PERMISSION_REQUEST_ID = 300;
 
     private View rootView;
     private SurfaceView surfaceView;
-    private Button button;
+    private FloatingActionButton recordButton;
 
     private R5Configuration r5Configuration;
 
     protected Camera camera;
     protected boolean isLive = false;
     protected R5Stream stream;
+
+    private int surfaceViewWidth;
+    private int surfaceViewHeight;
+    private int cameraRotation = 0;
+
+    private String[] permssions = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.RECORD_AUDIO
+    };
 
     public LiveFragment() {
 
@@ -86,8 +99,8 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
         surfaceView = rootView.findViewById(R.id.surface_view);
 
-        button = rootView.findViewById(R.id.live_button);
-        button.setOnClickListener(new View.OnClickListener() {
+        recordButton = rootView.findViewById(R.id.live_button);
+        recordButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 toggleLive();
@@ -97,25 +110,48 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
     private void preview() {
 
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    Manifest.permission.CAMERA)) {
-                Toast.makeText(getActivity(), "You need to grant camera access to live stream.",
-                        Toast.LENGTH_LONG).show();
-            }
-            else {
-
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.CAMERA},
-                        CAMERA_REQUEST_ID);
-            }
+        if (!hasAllPermissions()) {
+            requestPermission();
         }
         else {
-            camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
-            surfaceView.getHolder().addCallback(this);
+            setupCameraAndCallback();
         }
+    }
+
+    private boolean hasAllPermissions() {
+
+        for(String permission : permssions) {
+            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void requestPermission() {
+
+        if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
+                Manifest.permission.CAMERA)) {
+            Toast.makeText(getActivity(), "You need to grant camera access to live stream.",
+                    Toast.LENGTH_LONG).show();
+        }
+        else {
+            ActivityCompat.requestPermissions(getActivity(),
+                    permssions,
+                    PERMISSION_REQUEST_ID);
+        }
+    }
+
+    private void setupCameraAndCallback() {
+
+        camera = openFrontFacingCamera();
+        camera.stopPreview();
+        camera.setDisplayOrientation(90);
+        camera.startPreview();
+        surfaceView.getHolder().addCallback(this);
     }
 
     @Override
@@ -133,6 +169,11 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
+        Log.i(TAG, width + " " + height);
+
+        decideViewSize();
+
+        holder.setFixedSize(surfaceViewWidth,surfaceViewHeight);
     }
 
     @Override
@@ -163,11 +204,10 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
         switch(requestCode) {
 
-            case CAMERA_REQUEST_ID:
+            case PERMISSION_REQUEST_ID:
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    camera = Camera.open(Camera.CameraInfo.CAMERA_FACING_FRONT);
-                    surfaceView.getHolder().addCallback(this);
+                    setupCameraAndCallback();
                 }
                 else {
                     Toast.makeText(getActivity(), "You need to grant camera access to live stream.",
@@ -175,6 +215,34 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
                 }
                 break;
         }
+    }
+
+    private void decideViewSize() {
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int displayHeight = displayMetrics.heightPixels;
+        int displayWidth = displayMetrics.widthPixels;
+
+        List<Camera.Size> supportedSizes = camera.getParameters().getSupportedPictureSizes();
+
+        double displayAspectRatio = ( displayHeight * 1.0) / displayWidth;
+
+        double aspectRatio = 0.0;
+        double minDifference = 999999;
+
+        for(Camera.Size currentSize : supportedSizes) {
+
+            aspectRatio = ( currentSize.width * 1.0 ) / currentSize.height;
+
+            surfaceViewHeight = currentSize.width;
+
+            if(currentSize.width < displayHeight) {
+                break;
+            }
+        }
+
+        surfaceViewWidth = (int) ( surfaceViewHeight / aspectRatio );
     }
 
     private void toggleLive() {
@@ -187,7 +255,7 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
         isLive = !isLive;
 
-        button.setText((isLive)? "Stop": "Go Live");
+        //recordButton.setText((isLive)? "Stop": "Go Live");
     }
 
     private void start() {
@@ -206,6 +274,7 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
         stream.setView(surfaceView);
 
         R5Camera r5Camera = new R5Camera(camera, 640, 480);
+        r5Camera.setOrientation(cameraRotation);
         stream.attachCamera(r5Camera);
 
         R5Microphone r5Microphone = new R5Microphone();
@@ -213,6 +282,44 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
         stream.publish("myr5stream", R5Stream.RecordType.Live);
         camera.startPreview();
+    }
+
+    private Camera openFrontFacingCamera() {
+        int cameraCount = 0;
+        Camera cam = null;
+        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+        cameraCount = Camera.getNumberOfCameras();
+        for (int camIdx = 0; camIdx < cameraCount; camIdx++) {
+            Camera.getCameraInfo(camIdx, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                try {
+                    cam = Camera.open(camIdx);
+                    cameraRotation = cameraInfo.orientation;
+                    applyDeviceRotation();
+                    break;
+                } catch (RuntimeException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return cam;
+    }
+
+    private void applyDeviceRotation() {
+
+        int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 0; break;
+            case Surface.ROTATION_90: degrees = 90; break;
+            case Surface.ROTATION_180: degrees = 180; break;
+            case Surface.ROTATION_270: degrees = 270; break;
+        }
+
+        cameraRotation += degrees;
+
+        cameraRotation = cameraRotation%360;
     }
 
     private void stop() {
