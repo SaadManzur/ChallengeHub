@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ChallengeHub</string>
+    <string name="license_key">W5UD-J4FD-OH3I-J5IL</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="live_drawer_name">Go Live</string>
+    <string name="watch_live_drawer_name">Watch Live Stream</string>
+    <string name="server_host">http://169.234.78.222</string>
+</resources>
