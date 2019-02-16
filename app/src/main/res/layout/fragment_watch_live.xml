@@ -6,14 +6,14 @@
     tools:context=".fragment.WatchLiveFragment">
 
     <com.red5pro.streaming.view.R5VideoView
-        android:id="@+id/subscribeView"
+        android:id="@+id/subscriber_view"
         android:layout_centerHorizontal="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
 
     <Button
-        android:id="@+id/subscribeButton"
+        android:id="@+id/play_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="start"

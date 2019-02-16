@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import com.example.challengehub.R;
 import com.example.challengehub.fragment.LiveFragment;
+import com.example.challengehub.fragment.WatchLiveFragment;
 import com.mikepenz.materialdrawer.AccountHeader;
 import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
@@ -85,8 +86,7 @@ public class MainActivity extends AppCompatActivity {
                                 switch(position)
                                 {
                                     case 1:
-                                        Toast.makeText(getApplicationContext(), "Work in progress",
-                                                Toast.LENGTH_LONG).show();
+                                        switchFragment(WatchLiveFragment.getInstance());
                                         break;
 
                                     case 2:
