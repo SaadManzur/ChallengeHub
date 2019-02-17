@@ -7,20 +7,18 @@
 
     <SurfaceView
         android:id="@+id/surface_view"
-        android:layout_width="640px"
-        android:layout_height="480px"
-        android:layout_centerInParent="true"
-        android:scaleX="1"
-        android:scaleY="1"/>
-
-    <Button
-        android:id="@+id/live_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:padding="10dp"
         android:layout_centerInParent="true"
-        android:layout_below="@id/surface_view"
-        android:layout_margin="10dp"
-        android:text="Start"/>
+        />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/live_button"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/ic_play_circle_outline"
+        android:layout_margin="10dp"/>
 
 </RelativeLayout>
