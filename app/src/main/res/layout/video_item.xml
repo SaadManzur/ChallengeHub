@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    android:background="@color/colorShadedBackground">
+
+    <ImageView
+        android:id="@+id/thumbnail"
+        android:layout_width="120dp"
+        android:layout_height="70dp"
+        android:background="@color/md_black_1000"
+        />
+
+
+    <ImageButton
+        android:id="@+id/play"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@null"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_play_arrow"
+        android:translationX="1dp"
+        />
+
+    <ImageButton
+        android:id="@+id/facebook"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="@null"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_action_facebook"
+        android:layout_alignParentBottom="true"
+        />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dp"
+        android:textSize="14sp"
+        android:layout_toEndOf="@id/thumbnail"
+        android:layout_centerVertical="true"
+        android:layout_toStartOf="@id/facebook"
+        />
+
+</RelativeLayout>

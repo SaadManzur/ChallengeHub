@@ -4,13 +4,16 @@ package com.example.challengehub.fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.example.challengehub.R;
+import com.example.challengehub.misc.Utilities;
 import com.red5pro.streaming.R5Connection;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.R5StreamProtocol;
@@ -25,21 +28,23 @@ public class WatchLiveFragment extends Fragment {
     private final String TAG = getClass().toString();
 
     private View rootView;
-    private Button button;
+    private ImageButton button;
 
     private R5Configuration r5Configuration;
     private R5Stream r5Stream;
 
+    private String videoId = null;
     private boolean isPlaying = false;
 
     public WatchLiveFragment() {
 
     }
 
-    public static WatchLiveFragment getInstance() {
+    public static WatchLiveFragment getInstance(String videoId) {
 
         WatchLiveFragment watchLiveFragment = new WatchLiveFragment();
         Bundle bundle = new Bundle();
+        bundle.putString("videoId", videoId);
         watchLiveFragment.setArguments(bundle);
         return watchLiveFragment;
     }
@@ -48,7 +53,7 @@ public class WatchLiveFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        r5Configuration = new R5Configuration(R5StreamProtocol.RTSP, "169.234.78.222",
+        r5Configuration = new R5Configuration(R5StreamProtocol.RTSP, Utilities.SERVER,
                 8554, "live", 1.0f);
         r5Configuration.setLicenseKey(getString(R.string.license_key));
         r5Configuration.setBundleID(getActivity().getPackageName());
@@ -59,6 +64,12 @@ public class WatchLiveFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         rootView = inflater.inflate(R.layout.fragment_watch_live, container, false);
+
+        Bundle bundle = getArguments();
+
+        if(bundle != null && bundle.containsKey("videoId")) {
+            videoId = bundle.getString("videoId");
+        }
 
         setupUI();
 
@@ -96,7 +107,8 @@ public class WatchLiveFragment extends Fragment {
 
         isPlaying = !isPlaying;
 
-        button.setText((isPlaying)? "Stop": "Go Live");
+        button.setImageDrawable(ContextCompat.getDrawable(getActivity(), (isPlaying)?
+                R.drawable.ic_stop: R.drawable.ic_play_arrow));
     }
 
     private void start() {
@@ -105,7 +117,7 @@ public class WatchLiveFragment extends Fragment {
 
         r5Stream = new R5Stream(new R5Connection(r5Configuration));
         r5VideoView.attachStream(r5Stream);
-        r5Stream.play("myr5stream");
+        r5Stream.play(videoId);
     }
 
     private void stop() {

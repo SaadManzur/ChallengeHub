@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.challengehub.R;
+import com.example.challengehub.misc.Utilities;
 import com.red5pro.streaming.R5Connection;
 import com.red5pro.streaming.R5Stream;
 import com.red5pro.streaming.R5StreamProtocol;
@@ -78,7 +79,7 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
         super.onCreate(savedInstanceState);
 
-        r5Configuration = new R5Configuration(R5StreamProtocol.RTSP, "169.234.78.222",
+        r5Configuration = new R5Configuration(R5StreamProtocol.RTSP, Utilities.SERVER,
                 8554, "live", 1.0f);
         r5Configuration.setLicenseKey(getString(R.string.license_key));
         r5Configuration.setBundleID(getActivity().getPackageName());
@@ -255,7 +256,8 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
         isLive = !isLive;
 
-        //recordButton.setText((isLive)? "Stop": "Go Live");
+        recordButton.setImageDrawable(ContextCompat.getDrawable(getActivity(),
+                (isLive)? R.drawable.ic_stop: R.drawable.ic_play_circle_outline));
     }
 
     private void start() {
