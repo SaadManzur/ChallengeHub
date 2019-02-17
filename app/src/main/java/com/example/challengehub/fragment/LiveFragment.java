@@ -21,7 +21,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.example.challengehub.R;
+import com.example.challengehub.misc.RequestHandler;
 import com.example.challengehub.misc.Utilities;
 import com.red5pro.streaming.R5Connection;
 import com.red5pro.streaming.R5Stream;
@@ -32,7 +38,13 @@ import com.red5pro.streaming.event.R5ConnectionListener;
 import com.red5pro.streaming.source.R5Camera;
 import com.red5pro.streaming.source.R5Microphone;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -55,6 +67,9 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
     private int surfaceViewWidth;
     private int surfaceViewHeight;
     private int cameraRotation = 0;
+    private String challengeId = "";
+
+    private String streamName;
 
     private String[] permssions = {
             Manifest.permission.CAMERA,
@@ -65,10 +80,11 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
 
     }
 
-    public static LiveFragment getInstance() {
+    public static LiveFragment getInstance(String challengeId) {
 
         LiveFragment liveFragment = new LiveFragment();
         Bundle bundle = new Bundle();
+        bundle.putString("challengeId", challengeId);
         liveFragment.setArguments(bundle);
         return liveFragment;
     }
@@ -78,6 +94,11 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
     public void onCreate(@Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        Bundle bundle = getArguments();
+        if(bundle != null && bundle.containsKey("challengeId")) {
+            challengeId = bundle.getString("challengeId");
+        }
 
         r5Configuration = new R5Configuration(R5StreamProtocol.RTSP, Utilities.SERVER,
                 8554, "live", 1.0f);
@@ -94,6 +115,11 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
         setupUI();
 
         return rootView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
     }
 
     private void setupUI() {
@@ -122,7 +148,7 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
     private boolean hasAllPermissions() {
 
         for(String permission : permssions) {
-            if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA)
+            if (ContextCompat.checkSelfPermission(getActivity(), permission)
                     != PackageManager.PERMISSION_GRANTED) {
 
                 return false;
@@ -153,6 +179,53 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
         camera.setDisplayOrientation(90);
         camera.startPreview();
         surfaceView.getHolder().addCallback(this);
+    }
+
+    private void postVideo() {
+
+        StringRequest videoCreationRequest = new StringRequest(Request.Method.POST,
+                Utilities.DATA_SERVER + "videos",
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                //processFragmentCommunicator.hideProgress();
+                try {
+                    JSONObject jsonObject = new JSONObject(new String(error.networkResponse.data));
+                    JSONObject errorObject = jsonObject.getJSONObject("error");
+                    Toast.makeText(getContext(), errorObject.getString("message"), Toast.LENGTH_LONG).show();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                Map<String, String> params = new HashMap<>();
+
+                params.put("userId", Utilities.USER_ID);
+                params.put("name", streamName);
+                params.put("liveStream", streamName);
+                params.put("challengeId", challengeId );
+
+                return params;
+            }
+        };
+
+        videoCreationRequest.setTag(TAG);
+
+        RequestHandler.getInstance(getActivity()).getRequestQueue().add(videoCreationRequest);
     }
 
     @Override
@@ -282,7 +355,13 @@ public class LiveFragment extends Fragment implements SurfaceHolder.Callback {
         R5Microphone r5Microphone = new R5Microphone();
         stream.attachMic(r5Microphone);
 
-        stream.publish("myr5stream", R5Stream.RecordType.Live);
+        streamName = UUID.randomUUID().toString().substring(0,10);
+
+        if(challengeId != null) {
+            postVideo();
+        }
+
+        stream.publish(streamName, R5Stream.RecordType.Record);
         camera.startPreview();
     }
 
