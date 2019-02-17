@@ -14,7 +14,8 @@ import java.net.URLEncoder;
 public class Utilities {
 
     public static final String SERVER = "169.234.122.85";
-    public static final String DATA_SERVER = "https://admin-panel-charlienzw.c9users.io/";
+    public static final String DATA_SERVER = "https://hackuci-232005.appspot.com/";
+    public static final String GENERAL_CHALLENGE = "5c69312faa84c00008ab1a5b";
     public static String USER_NAME = "";
     public static String USER_ID = "";
 

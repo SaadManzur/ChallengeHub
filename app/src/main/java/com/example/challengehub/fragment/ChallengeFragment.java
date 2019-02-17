@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.GridView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -118,6 +119,10 @@ public class ChallengeFragment extends Fragment {
                 });
 
         challengeListRequest.setTag(TAG);
+
+        challengeListRequest.setRetryPolicy(new DefaultRetryPolicy(6000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         RequestHandler.getInstance(getContext()).getRequestQueue().add(challengeListRequest);
     }

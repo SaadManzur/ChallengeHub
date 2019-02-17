@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -57,11 +58,23 @@ public class WatchLiveFragment extends Fragment {
 
     }
 
-    public static WatchLiveFragment getInstance(String videoId) {
+    public static WatchLiveFragment getInstance(String videoName) {
+
+        return getInstance(videoName, null, null);
+    }
+
+    public static WatchLiveFragment getInstance(String videoName, String challengeId, String videoId) {
 
         WatchLiveFragment watchLiveFragment = new WatchLiveFragment();
         Bundle bundle = new Bundle();
-        bundle.putString("videoName", videoId);
+
+        bundle.putString("videoName", videoName);
+        if(challengeId != null)
+            bundle.putString("challengeId", challengeId);
+
+        if(videoId != null)
+            bundle.putString("videoId", videoId);
+
         watchLiveFragment.setArguments(bundle);
         return watchLiveFragment;
     }
@@ -91,6 +104,7 @@ public class WatchLiveFragment extends Fragment {
 
             if(bundle.containsKey("videoId"))
                 videoId = bundle.getString("videoId");
+
         }
 
         setupUI();
@@ -167,8 +181,8 @@ public class WatchLiveFragment extends Fragment {
 
     private void getVideoId() {
 
-        StringRequest videoIdRequest = new StringRequest(Request.Method.POST,
-                Utilities.DATA_SERVER + "/getVideoByName" + videoName, new Response.Listener<String>() {
+        StringRequest videoIdRequest = new StringRequest(Request.Method.GET,
+                Utilities.DATA_SERVER + "getVideoByName/" + videoName, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, response);
@@ -193,6 +207,10 @@ public class WatchLiveFragment extends Fragment {
         });
 
         videoIdRequest.setTag(TAG);
+
+        videoIdRequest.setRetryPolicy(new DefaultRetryPolicy(6000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
         RequestHandler.getInstance(getActivity()).getRequestQueue().add(videoIdRequest);
     }

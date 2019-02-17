@@ -2,10 +2,11 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="85dp"
     android:padding="10dp">
 
     <RelativeLayout
+        android:id="@+id/rank_panel"
         android:layout_width="60dp"
         android:layout_height="60dp"
         android:layout_centerVertical="true">
@@ -17,7 +18,7 @@
             />
 
         <TextView
-            android:id="@+id/tv_rank"
+            android:id="@+id/tv_count"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
@@ -29,10 +30,35 @@
 
 
     <TextView
+        android:id="@+id/tv_owner"
+        android:layout_toEndOf="@id/rank_panel"
+        android:layout_marginStart="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:layout_alignParentTop="true"
+        />
+
+    <TextView
+        android:id="@+id/tv_challenge"
+        android:layout_toEndOf="@id/rank_panel"
+        android:layout_marginStart="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:layout_centerVertical="true"
+        android:layout_alignParentBottom="true"
+        />
+
+    <ImageButton
+        android:id="@+id/facebook"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@null"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_share"
+        android:layout_centerInParent="true"
         />
 
 </RelativeLayout>

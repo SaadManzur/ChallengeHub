@@ -9,21 +9,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.example.challengehub.R;
 import com.example.challengehub.adapter.VideoListAdapter;
 import com.example.challengehub.misc.RequestHandler;
 import com.example.challengehub.misc.Utilities;
 import com.example.challengehub.model.Video;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +44,7 @@ public class LiveStreamListFragment extends Fragment {
 
     private VideoListAdapter videoListAdapter;
     private List<Video> videoList;
+    private String challengeId = null;
 
     private JsonObjectRequest streamInformationRequest;
 
@@ -46,10 +52,14 @@ public class LiveStreamListFragment extends Fragment {
 
     }
 
-    public static LiveStreamListFragment getInstance() {
+    public static LiveStreamListFragment getInstance(String challengeId) {
 
         LiveStreamListFragment fragment = new LiveStreamListFragment();
         Bundle bundle = new Bundle();
+
+        if(challengeId != null) {
+            bundle.putString("challengeId", challengeId);
+        }
         fragment.setArguments(bundle);
 
         return fragment;
@@ -60,6 +70,14 @@ public class LiveStreamListFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         rootView = inflater.inflate(R.layout.fragment_live_stream_list, container, false);
+
+        Bundle bundle = getArguments();
+
+        if(bundle != null) {
+            if(bundle.containsKey("challengeId")) {
+                challengeId = bundle.getString("challengeId");
+            }
+        }
 
         setupUI();
         
@@ -79,6 +97,19 @@ public class LiveStreamListFragment extends Fragment {
     }
 
     private void getLiveStreams() {
+
+        videoList.clear();
+        videoListAdapter.notifyDataSetChanged();
+
+        if(challengeId == null)
+            getAllStreams();
+        else
+            getChallengeSpecificStreams();
+
+    }
+
+
+    private void getAllStreams() {
 
         String[] params = new String[2];
         params[0] = "accessToken";
@@ -112,8 +143,57 @@ public class LiveStreamListFragment extends Fragment {
 
         streamInformationRequest.setTag(TAG);
 
+        streamInformationRequest.setRetryPolicy(new DefaultRetryPolicy(6000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
         RequestHandler.getInstance(getContext()).getRequestQueue().add(streamInformationRequest);
+
     }
 
+    private void getChallengeSpecificStreams () {
+
+        StringRequest videoIdRequest = new StringRequest(Request.Method.GET,
+                Utilities.DATA_SERVER + "videos/" + challengeId, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, response);
+
+                try {
+                    JSONArray jsonArray = new JSONObject(response).getJSONArray("selectedVideos");
+
+                    for(int i = 0; i < jsonArray.length(); i++) {
+                        JSONArray videoJSONArray = jsonArray.getJSONArray(i);
+
+                        for(int j = 0; j < videoJSONArray.length(); j++) {
+
+                            JSONObject currentVideoJSON = videoJSONArray.getJSONObject(j);
+
+                            Type videoType = new TypeToken<Video>() {}.getType();
+                            Video video = new Gson().fromJson(currentVideoJSON.toString(), videoType);
+                            videoList.add(video);
+                            videoListAdapter.notifyDataSetChanged();
+
+                        }
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+
+        videoIdRequest.setTag(TAG);
+
+        videoIdRequest.setRetryPolicy(new DefaultRetryPolicy(6000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+        RequestHandler.getInstance(getActivity()).getRequestQueue().add(videoIdRequest);
+    }
 
 }

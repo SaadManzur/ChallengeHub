@@ -18,14 +18,17 @@ public class ChallengeVideosFragment extends Fragment {
 
     private View rootView;
 
+    private String challengeId;
+
     public ChallengeVideosFragment() {
 
     }
 
-    public static ChallengeVideosFragment getInstance () {
+    public static ChallengeVideosFragment getInstance (String challengeId) {
 
         ChallengeVideosFragment challengeVideosFragment = new ChallengeVideosFragment();
         Bundle bundle = new Bundle();
+        bundle.putString("challengeId", challengeId);
         challengeVideosFragment.setArguments(bundle);
         return challengeVideosFragment;
     }
@@ -35,6 +38,8 @@ public class ChallengeVideosFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         rootView = inflater.inflate(R.layout.fragment_challenge_videos, container, false);
+
+
 
         return rootView;
     }

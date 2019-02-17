@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.challengehub.R;
@@ -49,16 +50,24 @@ public class VideoListAdapter extends ArrayAdapter {
     public View getView(final int position, View convertView, ViewGroup parent) {
 
         if(convertView == null){
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.video_item, null);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.challenge_video_item, null);
         }
 
-        ImageButton ibPlay = convertView.findViewById(R.id.play);
-        ibPlay.setOnClickListener(new View.OnClickListener() {
+        convertView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Video currentVideo = mVideos.get(position);
                 ((AppCompatActivity) mContext).getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.fragment_holder, WatchLiveFragment.getInstance(mVideos.get(position).getVideoId()))
+                        .replace(R.id.fragment_holder,
+                                (currentVideo.getChallengeId() == null)?
+                                        WatchLiveFragment.getInstance(currentVideo.getName()):
+                                        WatchLiveFragment.getInstance(
+                                            currentVideo.getName(),
+                                            currentVideo.getChallengeId(),
+                                            currentVideo.getVideoId()
+                                )
+                        )
                         .addToBackStack(null)
                         .commit();
             }
@@ -76,8 +85,15 @@ public class VideoListAdapter extends ArrayAdapter {
             }
         });
 
-        TextView title = convertView.findViewById(R.id.title);
-        title.setText(mVideos.get(position).getVideoId());
+        TextView title = convertView.findViewById(R.id.tv_owner);
+        title.setText(mVideos.get(position).getName());
+
+        TextView challengeText = convertView.findViewById(R.id.tv_challenge);
+        String challengeId = mVideos.get(position).getChallengeId();
+        challengeText.setText((challengeId == null)? "General Fun!" : challengeId);
+
+        TextView rankText = convertView.findViewById(R.id.tv_count);
+        rankText.setText(String.valueOf(mVideos.get(position).getLikeCount()));
 
         return convertView;
     }

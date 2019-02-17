@@ -132,11 +132,11 @@ public class MainActivity extends AppCompatActivity {
                                 switch(position)
                                 {
                                     case 1:
-                                        switchFragment(LiveStreamListFragment.getInstance());
+                                        switchFragment(LiveStreamListFragment.getInstance(null));
                                         break;
 
                                     case 2:
-                                        switchFragment(LiveFragment.getInstance("5c6911daad09f6604e4434da"));
+                                        switchFragment(LiveFragment.getInstance(Utilities.GENERAL_CHALLENGE));
                                         break;
 
                                     case 3:
