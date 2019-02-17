@@ -7,4 +7,5 @@
     <string name="watch_live_drawer_name">Watch Live Stream</string>
     <string name="server_host">169.234.122.85</string>
     <string name="server_access_token">347602146a923872538f3803eb5f3cef</string>
+    <string name="challenge_drawer_name">Challenges</string>
 </resources>

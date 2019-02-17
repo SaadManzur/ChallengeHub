@@ -14,6 +14,7 @@ import java.net.URLEncoder;
 public class Utilities {
 
     public static final String SERVER = "169.234.122.85";
+    public static final String DATA_SERVER = "https://admin-panel-charlienzw.c9users.io/";
 
     public static String generateRequest(String... values){
         if(values.length % 2 == 1)

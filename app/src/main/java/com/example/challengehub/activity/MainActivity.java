@@ -16,6 +16,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.example.challengehub.R;
+import com.example.challengehub.fragment.ChallengeFragment;
 import com.example.challengehub.fragment.LiveFragment;
 import com.example.challengehub.fragment.LiveStreamListFragment;
 import com.example.challengehub.fragment.WatchLiveFragment;
@@ -76,6 +77,11 @@ public class MainActivity extends AppCompatActivity {
                                                             .withIcon(GoogleMaterial.Icon.gmd_live_tv)
                                                             .withName(R.string.watch_live_drawer_name);
 
+        PrimaryDrawerItem challengeFragmentItem = new PrimaryDrawerItem()
+                .withIdentifier(3)
+                .withIcon(GoogleMaterial.Icon.gmd_star)
+                .withName(R.string.challenge_drawer_name);
+
         AccountHeader accountHeader = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.header)
@@ -99,7 +105,8 @@ public class MainActivity extends AppCompatActivity {
                         .withAccountHeader(accountHeader)
                         .addDrawerItems(
                                 watchLiveFragmentItem,
-                                liveFragmentItem
+                                liveFragmentItem,
+                                challengeFragmentItem
                         )
                         .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                             @Override
@@ -114,6 +121,9 @@ public class MainActivity extends AppCompatActivity {
                                     case 2:
                                         switchFragment(LiveFragment.getInstance());
                                         break;
+
+                                    case 3:
+                                        switchFragment(ChallengeFragment.getInstance());
                                 }
 
                                 return false;
