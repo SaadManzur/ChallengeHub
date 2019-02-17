@@ -2,6 +2,8 @@ package com.example.challengehub.model;
 
 import android.support.v4.content.ContextCompat;
 
+import com.example.challengehub.misc.Utilities;
+
 public class Video {
 
     private String _id;
@@ -88,8 +90,8 @@ public class Video {
 
         if(isLive) {
 
-            String server = "169.234.78.222";
-            String url = "http://" + server + ":5080/live/viewer.jsp?host=" + server + "&stream=" + _id;
+            String server = Utilities.SERVER;
+            String url = "http://" + server + ":5080/live/viewer.jsp?host=" + server + "&stream=" + name;
 
             return url;
         }
